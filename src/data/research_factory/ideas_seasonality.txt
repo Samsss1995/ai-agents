@@ -1,0 +1,6 @@
+# Seasonality / calendar-anomaly batch (fixed a-priori calendar rules - no statistics
+# computed from the dataset itself, which would be lookahead).
+# Run: sh src/scripts/run_ideas_cycles.sh src/data/research_factory/ideas_seasonality.txt
+SEAS-1 Turn-of-month flow: institutional contribution and rebalancing flows cluster around month boundaries; hold a long position only from the close of the last trading day of each month through the close of the third trading day of the new month, flat otherwise, no leverage, no stop (the holding window IS the risk control). The bar timestamp's calendar date drives all logic; nothing is estimated from price history.
+SEAS-2 Halloween effect: the documented Nov-Apr vs May-Oct return asymmetry in risk assets; hold long from the first bar of November through the last bar of April, flat May through October. Calendar-only rule, no parameters to fit beyond the two month boundaries fixed a priori by the published anomaly.
+SEAS-3 Weekday window: institutional flow concentrates in mid-week sessions while weekends (crypto) and Mondays (legacy markets) carry adverse drift and gaps; hold long only from Tuesday's open through Friday's close, flat over Friday-close-to-Tuesday-open. Calendar-only rule from the bar timestamp's weekday.

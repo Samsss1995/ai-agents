@@ -1,0 +1,92 @@
+# Quant Research Factory - global configuration
+# Every tunable of the research pipeline lives here. No thresholds are hardcoded in code.
+
+# Interpreter used to execute backtests in subprocess mode.
+# Empty string -> use the interpreter running the factory (sys.executable).
+# NOTE (2026-06-10): conda env `tflow` does not exist on this machine and .venv has no
+# packages installed. Fix the environment, then point this at the right python.
+python_executable: ""
+
+paths:
+  root: src/data/research_factory          # store, generated strategies, reports
+  strategies_dir: src/data/research_factory/strategies
+  reports_dir: src/data/research_factory/reports
+  promoted_dir: src/strategies/custom      # promotion wrappers land here
+
+data:
+  # Directories scanned by the data catalog for OHLCV CSVs.
+  # src/data/rbi intentionally excluded: its 2023-only BTC file is subsumed by
+  # the deep pulls in src/data/ohlcv and would silently collide on dataset_id.
+  dirs:
+    - src/data/ohlcv
+  # Refuse to backtest a dataset with fewer bars than this.
+  min_bars: 5000
+  # Daily datasets: 2500 bars is ~10 years - a stricter test than 5000 intraday bars.
+  min_bars_1d: 2500
+  # Refuse walk-forward test folds spanning less than this many calendar days.
+  # Time-based, not bar-based: 1500 bars is 15 days of 15m but 250 days of 4h.
+  min_fold_days: 30
+  # Maximum tolerated gap between candles, as a multiple of the native timeframe.
+  # 24 admits the two known gaps (max 285min) in BTC-USD-15m while still rejecting
+  # datasets with multi-day holes.
+  max_gap_multiple: 24
+  # Maximum fraction of missing candles before a dataset is flagged unusable.
+  max_missing_fraction: 0.02
+  # Daily market data: busday_count cannot see exchange holidays (~3.6%/year),
+  # so 1d datasets get a wider tolerance.
+  max_missing_fraction_1d: 0.06
+
+splits:
+  train: 0.60
+  validation: 0.20
+  test: 0.20        # holdout - touched once, at promotion time only
+
+costs:
+  # Standardized cost model applied to EVERY backtest. Per-spec overrides allowed
+  # only upward (more conservative), never downward.
+  commission: 0.001        # fraction per side (0.1%)
+  slippage_bps: 2.0        # added to commission as bps of notional
+  cash: 100000
+  margin: 1.0              # 1.0 = no leverage in research backtests
+  exclusive_orders: true
+
+walk_forward:
+  n_folds: 4
+  min_train_frac: 0.40     # anchored: first fold trains on at least this fraction
+
+monte_carlo:
+  n_iterations: 1000
+  seed: 42
+
+param_neighborhood:
+  # Each numeric strategy parameter is perturbed by these multipliers.
+  multipliers: [0.8, 0.9, 1.1, 1.2]
+
+cost_stress:
+  multipliers: [1.5, 2.0]
+
+llm:
+  provider: claude          # ModelFactory type: claude | openai
+  model: claude-sonnet-4-5  # explicit: ClaudeModel otherwise defaults to claude-3-haiku
+  temperature: 0.2
+  max_tokens: 8000
+  max_debug_iterations: 5   # bounded LLM fix loop for generated code
+
+backtest:
+  timeout_seconds: 300
+  run_in_subprocess: false  # true -> isolate each run in a subprocess
+
+leaderboard:
+  # Composite score weights. Score is built from OOS (validation) metrics only.
+  weights:
+    sharpe: 0.30
+    sortino: 0.15
+    calmar: 0.20
+    profit_factor: 0.15
+    oos_retention: 0.20     # walk-forward OOS / in-sample return ratio (capped at 1)
+  penalties:
+    low_trades: 0.25        # applied when trades < gates.min_trades
+    drawdown_over_limit: 0.30
+    cost_fragility: 0.20    # fails 1.5x cost stress
+    param_fragility: 0.20   # neighborhood mean collapses
+    single_asset: 0.10      # unless spec is intentionally single-asset

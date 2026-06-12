@@ -1,0 +1,5 @@
+# Consecutive-down-bar reversal pair (user ideas 4 & 5, 2026-06-12). Same entry,
+# deliberately different exits - the exit IS the experiment.
+# Run: sh src/scripts/run_ideas_cycles.sh src/data/research_factory/ideas_downdays.txt
+DOWN-4 Consecutive down-bar reversal with fixed exit: after 4 consecutive down closes (bars on the trading timeframe; days on daily data), short-term sellers are exhausted and liquidity providers fade the move; buy the close of the 4th down bar and exit at the close of the NEXT bar unconditionally - the one-bar holding window is the entire risk control, no stop, no target. The fixed exit isolates the pure next-bar rebound effect.
+DOWN-5 Consecutive down-bar reversal with volatility-confirmed exit: identical entry - buy the close of the 4th consecutive down close - but hold until either the first close above the entry bar's high (rebound confirmed), an ATR-based stop below the entry low is hit, or a maximum of 5 bars elapses; the adaptive exit tests whether letting confirmed rebounds run beats the fixed one-bar exit on the same entry signal.

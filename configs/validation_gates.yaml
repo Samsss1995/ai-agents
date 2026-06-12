@@ -1,0 +1,76 @@
+# Promotion gates. A strategy moves research_only -> paper_candidate only if ALL
+# hard gates pass. Edit values here; code never hardcodes thresholds.
+# Gates are evaluated on VALIDATION (out-of-sample) metrics unless stated otherwise.
+
+gates:
+  min_trades:
+    value: 100
+    hard: true
+    note: "Evaluated across train+validation. Specs declaring low_frequency use min_trades_low_frequency."
+  min_trades_low_frequency:
+    value: 30
+    hard: true
+  positive_oos_return:
+    value: 0.0           # validation return % must exceed this
+    hard: true
+  min_profit_factor:
+    value: 1.20          # after costs
+    hard: true
+  max_drawdown_pct:
+    value: 25.0          # absolute value, after costs
+    hard: true
+  min_sharpe:
+    value: 1.0           # after costs
+    hard: true
+  min_sortino:
+    value: 1.5           # after costs
+    hard: true
+  min_calmar:
+    value: 0.75
+    hard: true
+  walk_forward_retention:
+    value: 0.50          # mean OOS fold return must be >= 50% of in-sample return
+    hard: true
+  walk_forward_positive:
+    value: 0.0           # mean OOS fold return must be positive
+    hard: true
+  cost_stress_multiplier:
+    value: 1.5           # must remain profitable at this cost multiple
+    hard: true
+  param_neighborhood_retention:
+    value: 0.60          # neighborhood mean return >= 60% of point estimate
+    hard: true
+  single_trade_dependence:
+    value: 0.0           # return with best trade removed must exceed this
+    hard: true
+  monte_carlo_p05_drawdown_pct:
+    value: 35.0          # 5th-percentile reshuffled equity path max DD limit
+    hard: false
+  max_exposure_pct:
+    value: 100.0
+    hard: false
+  require_hypothesis:
+    value: true          # spec must contain a non-empty market hypothesis
+    hard: true
+  static_review_clean:
+    value: true          # no hard findings from strategy_review_agent static checks
+    hard: true
+
+paper_promotion:
+  # Additional requirements checked by promotion.py for paper_candidate -> paper_active
+  require_code_review: true
+  require_risk_config: true
+  require_broker_profile: true
+  require_kill_switch: true
+  max_daily_loss_usd: 100
+  max_position_usd: 1000
+  max_total_exposure_usd: 2000
+
+live_promotion:
+  # live_candidate/live_approved transitions. ALL require manual approval.
+  require_manual_approval: true
+  require_paper_report: true
+  require_named_broker: true
+  require_emergency_stop: true
+  require_rollback_plan: true
+  min_paper_days: 14

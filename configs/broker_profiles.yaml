@@ -1,0 +1,38 @@
+# Broker / venue profiles. No live adapter is enabled by default.
+# live_enabled: true alone is NOT sufficient to trade live - the adapter also
+# requires env BROKER_LIVE_CONFIRM=YES_I_APPROVE_LIVE_TRADING at runtime.
+
+paper:
+  type: paper
+  starting_cash: 10000
+  taker_fee: 0.00045
+  maker_fee: 0.00015
+  slippage_bps: 3.0
+  min_notional_usd: 10
+  max_position_usd: 1000
+  max_total_exposure_usd: 2000
+  max_daily_loss_usd: 100
+  kill_switch: true
+
+hyperliquid:
+  type: hyperliquid
+  live_enabled: false          # hard default: read-only (market data, positions)
+  taker_fee: 0.00045
+  maker_fee: 0.00015
+  slippage_bps: 3.0
+  min_notional_usd: 10
+  max_leverage: 3
+  max_position_usd: 500
+  max_total_exposure_usd: 1000
+  max_daily_loss_usd: 50
+  kill_switch: true
+
+ibkr:
+  type: ibkr_stub
+  live_enabled: false
+  note: "Stub. Requires IBKR account + TWS/Gateway + ib_insync. Paper account first."
+
+solana_dex:
+  type: solana_dex_stub
+  live_enabled: false
+  note: "Stub. Route undecided (Phantom/GMGN/Jupiter). Existing Jupiter code uses skip_preflight=True and must be fixed before wrapping."

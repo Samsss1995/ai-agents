@@ -162,3 +162,17 @@ binance_trades.csv
 
 # Ignore large video files (assistant)
 src/data/chat_agent/*.mov
+
+# ===== Research factory: data and run artifacts (regenerable or live; never commit) =====
+src/data/ohlcv/
+src/data/signals/
+src/data/l2_snapshots/
+src/data/research_factory/research.db
+src/data/research_factory/strategies/
+src/data/research_factory/strategies_v2/
+src/data/research_factory/specs/
+src/data/research_factory/reports/
+src/data/research_factory/paper_broker/
+src/data/research_factory/*.log
+src/data/research_factory/data_catalog.json
+src/data/research_factory/processed_ideas.log

@@ -16,16 +16,14 @@ solana==0.35.1
 solders==0.21.0
 
 # HyperLiquid (Updated for v0.20.0)
-hyperliquid-python-sdk==0.20.0
+hyperliquid-python-sdk==0.24.0
 eth-account==0.11.0
 web3==6.20.1
 
 # ========== Data & Analysis ==========
-pandas==2.2.3
-numpy==2.1.0
-pandas-ta==0.3.14b0
-TA-Lib==0.4.32  # Technical indicators
-Backtesting==0.3.3  # Backtesting framework
+pandas-ta==0.4.71b0
+TA-Lib==0.6.8  # Technical indicators
+Backtesting==0.6.5  # Backtesting framework
 yfinance==0.2.43  # For fetching Yahoo Finance data
 
 # ========== Utilities ==========
@@ -34,27 +32,12 @@ termcolor==2.3.0
 colorama==0.4.6  # For colored terminal output
 requests==2.31.0
 tqdm==4.67.1
-pathlib
 schedule==1.2.0  # For scheduled tasks
 psutil==5.9.8  # System and process utilities
 asyncio  # Built-in, but noting for async support
 httpx==0.28.1  # Modern HTTP client
 
-# ========== Media Processing ==========
-# For real-time clips and video agents
-opencv-python==4.10.0.84
-pillow==10.3.0
-ffmpeg-python==0.2.0
-whisper==1.1.10
-openai-whisper==20231117
-elevenlabs==0.2.24
 
-# ========== Document Processing ==========
-PyPDF2==3.0.0
-youtube-transcript-api==0.6.2
-
-# ========== Social Media / Twitter ==========
-twikit==2.2.1  # Twitter API client
 
 # ========== Optional/Advanced ==========
 # Uncomment if needed for specific agents:
@@ -93,6 +76,5 @@ twikit==2.2.1  # Twitter API client
 # ./configure --prefix=/usr
 # make
 # sudo make install
-# pip install TA-Lib
-# ========== Research Factory ==========
-PyYAML==6.0.2  # configs/research_factory.yaml et al
+# pip install TA-LibPyYAML==6.0.2  # configs/research_factory.yaml et al
+yfinance==1.4.1  # daily data for stocks/indices/commodities/forex (research factory)
