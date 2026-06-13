@@ -88,6 +88,16 @@ def promote(spec_id: str, to_status: str, approved_by: Optional[str] = None,
             store.record_rejection(spec_id, "holdout",
                                    f"holdout test return {ret} not positive")
             raise PromotionError(f"holdout (test slice) return {ret} is not positive - rejected")
+        # alpha-vs-buy-and-hold gate (added 2026-06-13): a positive holdout return that
+        # is merely fractional beta is not alpha. Block it when the alpha figure exists.
+        alpha = holdout_metrics.get("alpha_vs_bh_pct")
+        if alpha is not None and alpha <= 0:
+            store.record_rejection(spec_id, "holdout_alpha",
+                                   f"holdout alpha vs buy-and-hold {alpha:.2f}%/yr not positive "
+                                   f"(beta {holdout_metrics.get('beta_vs_bh')}) - managed beta, not alpha")
+            raise PromotionError(
+                f"holdout return is positive but alpha vs buy-and-hold is {alpha:.2f}%/yr "
+                f"(<=0) - this is managed beta, not alpha. Rejected.")
 
     if to_status == "paper_active":
         paper_cfg = gates_cfg["paper_promotion"]

@@ -119,6 +119,16 @@ def evaluate_gates(
                               static_review_clean, g["value"], g["hard"],
                               "no hard findings from static lookahead/bias checks"))
 
+    # Alpha vs buy-and-hold: catches "high Sharpe that is secretly fractional beta"
+    # (DMA200, wide-universe trend, VolRegime/VixRegime all failed here). Evaluated
+    # only when the alpha figure is supplied (always at promotion's holdout test;
+    # absent in lightweight research runs, where it is skipped rather than failed).
+    g = _gate(cfg, "min_alpha_vs_bh_pct")
+    alpha = validation_metrics.get("alpha_vs_bh_pct")
+    if alpha is not None:
+        check("alpha_vs_bh", alpha, g["value"], g["hard"],
+              reason="annualized regression alpha vs buy-and-hold after costs")
+
     return results
 
 

@@ -27,6 +27,7 @@ class XSConfig:
     rank_by: str = "momentum"   # "momentum" | "carry"
     cost_per_side: float = 0.0012
     accrue_carry: bool = False  # credit/debit funding against position sign
+    quarter_end_only: bool = False  # hold positions only in the last ~week of each quarter
 
 
 @dataclass
@@ -73,9 +74,26 @@ def run_xsectional(dfs: Dict[str, pd.DataFrame], config: XSConfig,
     n_rebalances = 0
     cost_series = pd.Series(0.0, index=closes.index)
 
+    prev_active = False
     for i in range(config.lookback_bars, len(closes)):
         ts = closes.index[i]
-        if (i - config.lookback_bars) % config.rebalance_bars == 0:
+        if config.quarter_end_only:
+            active = ts.month in (3, 6, 9, 12) and ts.day >= 24
+            do_rebalance = active and not prev_active   # rank once on window entry
+            force_flat = prev_active and not active     # flatten on window exit
+            prev_active = active
+            if force_flat and current.abs().sum() > 1e-12:
+                turnover = float(current.abs().sum())
+                cost_series.iloc[min(i + 1, len(closes) - 1)] += turnover * config.cost_per_side
+                total_turnover += turnover
+                for sym in list(open_holdings):
+                    path = open_holdings.pop(sym)
+                    holding_returns.append(float(np.prod([1 + r for r in path]) - 1)
+                                           * np.sign(current[sym]))
+                current = pd.Series(0.0, index=closes.columns)
+        else:
+            do_rebalance = (i - config.lookback_bars) % config.rebalance_bars == 0
+        if do_rebalance:
             row = signal.iloc[i].dropna()
             if len(row) >= max(config.top_n + config.bottom_n, 2):
                 ranked = row.sort_values(ascending=False)

@@ -64,6 +64,24 @@ Configured in `configs/validation_gates.yaml` and `configs/research_factory.yaml
 - static lookahead checks pass
 - spec contains an explicit market hypothesis (free text required, enforced at spec validation)
 
+## D2. Alpha-vs-buy-and-hold gate (added 2026-06-13)
+
+A high Sharpe can be fractional beta in disguise: a strategy that holds, say, 40% of
+a bull market scores Sharpe ~1 on the standard battery while adding no value over
+simply buying and holding. This pattern surfaced in DMA200 (stocks), the wide-universe
+trend family, and VolRegime/VixRegime (Sharpe up to 1.37) - all of which passed most
+standard gates. The pre-registered VolVix confirmation (2026-06-13) exposed it via
+regression: betas 0.06-0.43, alpha <= 0 on the equity cells, holdout returns below
+buy-and-hold.
+
+Gate `min_alpha_vs_bh_pct` (configs/validation_gates.yaml, default 0.0, hard) now
+requires positive annualized regression alpha vs buy-and-hold, after costs. It is
+evaluated whenever the alpha figure is supplied - always at promotion's holdout test
+(run_holdout_test computes beta and alpha from the strategy's daily returns regressed
+on the instrument's), and skipped in lightweight research runs that don't compute it.
+promotion.py additionally blocks any promotion whose holdout alpha <= 0 even if the
+holdout return is positive ("managed beta, not alpha").
+
 ## E. Honest limitations
 
 - Walk-forward on 323 days of 15m data gives short folds; conclusions remain weak until the data catalog is extended (more assets, more years, bear/chop regimes). The data catalog refuses runs below configurable minimum bars per fold rather than silently proceeding.

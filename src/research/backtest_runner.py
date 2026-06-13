@@ -211,11 +211,27 @@ def run_holdout_test(spec, module_path: Path, store, code_id: str,
     catalog = DataCatalog(config)
     requirements = spec.data_requirements or {}
     dataset_ids = requirements.get("datasets") or _match_datasets(spec, catalog)
+    import numpy as np
     out: Dict[str, Any] = {}
     for dataset_id in dataset_ids:
         df = catalog.require(dataset_id, requirements.get("min_bars"))
         _, _, test_df = split_data(df, config)
-        _, metrics = run_backtest(module_path, test_df, config=config)
+        stats, metrics = run_backtest(module_path, test_df, config=config)
+        # alpha vs buy-and-hold on the holdout: regression of strategy daily returns
+        # on the instrument's daily returns. Catches high-Sharpe fractional beta.
+        try:
+            eq = stats["_equity_curve"]["Equity"].resample("1D").last().pct_change().dropna()
+            bh = test_df["Close"].resample("1D").last().pct_change().dropna()
+            j = eq.to_frame("s").join(bh.to_frame("b"), how="inner").dropna()
+            if len(j) > 10 and j["b"].var() > 0:
+                beta = float(np.cov(j["s"], j["b"])[0, 1] / np.var(j["b"]))
+                resid = j["s"] - beta * j["b"]
+                ppy = len(j) / max((j.index[-1] - j.index[0]).total_seconds()
+                                   / (365.25 * 86400), 1e-9)
+                metrics["alpha_vs_bh_pct"] = float(resid.mean() * ppy * 100)
+                metrics["beta_vs_bh"] = beta
+        except Exception:
+            pass
         store.record_experiment(
             spec.spec_id, "test", True, code_id=code_id, dataset_id=dataset_id,
             metrics=metrics, config_hash=config_hash(config),

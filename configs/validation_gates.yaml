@@ -55,6 +55,11 @@ gates:
   static_review_clean:
     value: true          # no hard findings from strategy_review_agent static checks
     hard: true
+  min_alpha_vs_bh_pct:
+    value: 0.0           # annualized regression alpha vs buy-and-hold, after costs
+    hard: true           # only evaluated when alpha figure is supplied (promotion holdout);
+                         # added 2026-06-13 after VolRegime/VixRegime exposed high-Sharpe
+                         # fractional-beta strategies that the other gates passed
 
 paper_promotion:
   # Additional requirements checked by promotion.py for paper_candidate -> paper_active
